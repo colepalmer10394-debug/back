@@ -41,7 +41,7 @@ class Device {
     return result.rows.map(row => new Device(row));
   }
 
-  static async getDeviceChartData(device_id, timeRange = 'day') {
+  static async getDeviceChartData(serial_number, timeRange = 'day') {
     let timeFilter = '';
     let groupBy = '';
     
@@ -72,9 +72,9 @@ class Device {
       SELECT dt.type_name 
       FROM device d 
       JOIN device_type dt ON d.device_type_id = dt.id 
-      WHERE d.id = $1
+      WHERE d.serial_number = $1
     `;
-    const deviceTypeResult = await database.query(deviceTypeQuery, [device_id]);
+    const deviceTypeResult = await database.query(deviceTypeQuery, [serial_number]);
     const deviceType = deviceTypeResult.rows[0]?.type_name;
 
     // Build dynamic query based on device type
@@ -148,7 +148,7 @@ class Device {
       ORDER BY time_period
     `;
 
-    const result = await database.query(query, [device_id]);
+    const result = await database.query(query, [serial_number]);
     return result.rows;
   }
 
@@ -243,7 +243,7 @@ WITH RECURSIVE hierarchy_cte AS (
     return result.rows;
   }
 
-  static async getLatestDeviceData(device_id) {
+  static async getLatestDeviceData(serial_number) {
     const query = `
       SELECT 
         dd.*,
@@ -257,7 +257,7 @@ WITH RECURSIVE hierarchy_cte AS (
       LIMIT 1
     `;
 
-    const result = await database.query(query, [device_id]);
+    const result = await database.query(query, [serial_number]);
     return result.rows[0] || null;
   }
 
